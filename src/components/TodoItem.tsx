@@ -8,7 +8,7 @@ interface TodoItemProps {
 }
 export default function TodoItem({ id, text }: TodoItemProps) {
   const removeTodo = (targetId: number) => {
-    console.log(`remove ${{ targetId }}`);
+    console.log(`remove ${targetId}`);
   };
 
   return (
