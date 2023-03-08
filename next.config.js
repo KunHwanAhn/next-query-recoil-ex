@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const defaultConfig = {
-  reactStrictMode: true,
   swcMinify: true,
 };
 

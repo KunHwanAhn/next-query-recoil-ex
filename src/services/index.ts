@@ -1,5 +1,5 @@
 import apiInstance from '@/utils/apiInterface';
-import type { Todo } from '@/@types/index';
+import type { Todo, Album } from '@/@types/index';
 
-// eslint-disable-next-line import/prefer-default-export
 export const getTodos = async (): Promise<Todo[] | null> => apiInstance.get('/todos');
+export const getAlbums = async (): Promise<Album[] | null> => apiInstance.get('/albums');

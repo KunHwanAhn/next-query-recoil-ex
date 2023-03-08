@@ -4,3 +4,9 @@ export type Todo = {
   title: string;
   completed: boolean
 };
+
+export type Album = {
+  userId: number;
+  id: number;
+  title: string;
+};
