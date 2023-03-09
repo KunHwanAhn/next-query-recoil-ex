@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { AppProps } from 'next/app';
+import type { AppProps as NextAppProps } from 'next/app';
 import {
   Hydrate,
   QueryClient,
@@ -12,9 +12,13 @@ import '@/styles/globals.scss';
 import DefaultLayout from '@/components/DefaultLayout';
 
 export type CustomPageProps = {
-  dehydratedState: DehydratedState
+  dehydratedState: DehydratedState;
 };
-export default function App({ Component, pageProps }: AppProps<CustomPageProps>) {
+export type AppProps = {
+  pageProps: CustomPageProps;
+} & Omit<NextAppProps, 'pageProps'>;
+
+export default function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient());
   const { dehydratedState, ...restPageProps } = pageProps;
 

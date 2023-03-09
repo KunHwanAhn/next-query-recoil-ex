@@ -7,9 +7,12 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "cp .env.qa .env.local && next dev | pino-pretty -t -c",
+    "build": "cp .env.qa .env.local && next build",
+    "build:qa": "cp .env.qa .env.local && next build",
+    "build:stg": "cp .env.stg .env.local && next build",
+    "build:prd": "cp .env.prd .env.local && next build",
+    "start": "next start | pino-pretty -t -c",
     "lint": "next lint"
   },
   "dependencies": {
