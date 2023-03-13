@@ -17,7 +17,7 @@ RUN yarn
 # Copying source files
 COPY . /usr/src/app
 
-RUN yarn next telemetry disabled
+RUN yarn next telemetry disable
 
 # Building app
 ARG BUILD_ENV
