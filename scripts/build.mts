@@ -1,24 +1,25 @@
-import { cp, writeFile } from 'fs/promises';
-import { spawn as baseSpawn, SpawnOptions } from 'child_process';
+import { writeFile } from 'fs/promises';
+import { SpawnOptions } from 'child_process';
 import { Command, Option, OptionValues } from 'commander';
 import { exit } from 'process';
 
+import type { EnvType, DdTraceEnv, NextBuildMode } from './types.js';
+/* eslint-disable import/extensions */
+import { ENV_LIST, NEXT_BUILD_MODEL_LIST } from './constants.mjs';
+import { copyEnvironment, spawn } from './utils.mjs';
+/* eslint-enable import/extensions */
+
 const program = new Command();
 
-const EnvList = ['qa', 'stg', 'prd'] as const;
-const NextBuildModeList = ['dev'] as const;
-
-type EnvType = typeof EnvList[number];
-type NextBuildMode = typeof NextBuildModeList[number];
 interface CustomOptions extends OptionValues {
   env: EnvType;
   nextBuildMode?: NextBuildMode;
 }
 const envOption = new Option('-e, --env <target>', 'build environment')
   .default('qa', 'QA Server')
-  .choices(EnvList);
+  .choices(ENV_LIST);
 const nextBuildMode = new Option('--next-build-mode <mode>', 'next.js BUILD_MODE')
-  .choices(NextBuildModeList);
+  .choices(NEXT_BUILD_MODEL_LIST);
 
 program
   .addOption(envOption)
@@ -36,41 +37,6 @@ if (TARGET_ENV === 'prd' && NEXT_BUILD_MODE) {
   exit(1);
 }
 
-/**
- * spawn with Promise
- */
-// eslint-disable-next-line max-len
-const spawn = async (command: string, args: string[] = [], spawnOptions?: SpawnOptions) => new Promise((resolve, reject) => {
-  const process = baseSpawn(command, args, {
-    ...spawnOptions,
-    stdio: 'inherit',
-  });
-
-  process.on('close', (code) => { resolve(code); });
-  process.on('error', (err) => { reject(err); });
-  /* eslint-disable no-console */
-  process.stdout?.on('data', (data) => { console.log(data.toString()); });
-  process.stderr?.on('data', (data) => { console.log(data.toString()); });
-  /* eslint-enable no-console */
-});
-
-/**
- * 환경변수 파일 복사
-*/
-const copyEnvironment = async () => {
-  const DEST_FILE_PATH = '.env.local';
-  const sourceFilePath = `.env.${TARGET_ENV}`;
-
-  // eslint-disable-next-line no-console
-  console.log(`Copy file from ${sourceFilePath} to ${DEST_FILE_PATH}`);
-
-  await cp(sourceFilePath, DEST_FILE_PATH);
-};
-
-interface DdTraceEnv {
-  service: 'my-service-name',
-  env: EnvType;
-}
 const SERVICE_MAP: Record<EnvType, DdTraceEnv> = {
   qa: {
     service: 'my-service-name',
@@ -85,21 +51,25 @@ const SERVICE_MAP: Record<EnvType, DdTraceEnv> = {
     env: 'prd',
   },
 };
+const SERVER_PRELOAD_FILE_NAME = 'server-preload.js';
 /**
  * Datadog dd-trace 설정을 위한 loader 생성
+ *
+ * @param env 타겟 서버
+ * @param fileName
  */
-const createServerPreload = async () => {
-  const SERVER_PRELOAD_FILE_NAME = 'server-preload.js';
-
+const createServerPreload = async (env: EnvType, fileName: string = SERVER_PRELOAD_FILE_NAME) => {
   // eslint-disable-next-line no-console
-  console.log(`Generate ${SERVER_PRELOAD_FILE_NAME} for ${TARGET_ENV}`);
+  console.log(`Generate ${fileName} for ${env}`);
 
-  const target = SERVICE_MAP[TARGET_ENV];
+  const target = SERVICE_MAP[env];
   const contents = `function setupDatadogTracing() {
   const { tracer: Tracer } = require("dd-trace");
 
   Tracer.init({
-    service: "${target.service}",
+    // service: "${target.service}",
+    // env: "${target.env}",
+    service: "my-service-name",
     env: "${target.env}",
     runtimeMetrics: true,
     logInjection: true,
@@ -111,7 +81,7 @@ const createServerPreload = async () => {
 
 setupDatadogTracing();
 `;
-  await writeFile(SERVER_PRELOAD_FILE_NAME, contents, {
+  await writeFile(fileName, contents, {
     encoding: 'utf-8',
     flag: 'w+',
   });
@@ -140,8 +110,8 @@ const runNextBuild = async () => {
 
 (async () => {
   const jobQueue = [
-    copyEnvironment,
-    createServerPreload,
+    async () => { await copyEnvironment(`.env.${TARGET_ENV}`); },
+    async () => { await createServerPreload(TARGET_ENV); },
     runNextBuild,
   ];
 
