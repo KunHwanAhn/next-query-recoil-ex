@@ -55,6 +55,8 @@ const SERVER_PRELOAD_FILE_NAME = 'server-preload.js';
 /**
  * Datadog dd-trace 설정을 위한 loader 생성
  *
+ * {@link https://github.com/vercel/next.js/discussions/16600?sort=top#discussioncomment-1397255 next.js discussions}
+ *
  * @param env 타겟 서버
  * @param fileName
  */

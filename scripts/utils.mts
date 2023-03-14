@@ -5,6 +5,8 @@ const DEST_FILE_PATH = '.env.local';
 /**
  * 환경변수 파일 복사
  *
+ * {@link https://github.com/vercel/next.js/discussions/12077?sort=top#discussioncomment-485351 next.js discussions}
+ *
  * @param sourcePath 원본 파일
  * @param destPath 목적 파일
  */
