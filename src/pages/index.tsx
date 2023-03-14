@@ -3,6 +3,8 @@ import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { dehydrate, QueryClient, useQuery } from 'react-query';
 
+import logger from '@/logger';
+
 import { QUERY_KEY } from '@/constants/index';
 import { getTodos } from '@/services/index';
 
@@ -10,6 +12,8 @@ import TodoForm from '@/components/TodoForm';
 import TodoItem from '@/components/TodoItem';
 
 export const getServerSideProps: GetServerSideProps = async () => {
+  logger.info(`server env >> ${process.env.SERVER_VAR_1}`);
+
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(QUERY_KEY.GET_TODOS, getTodos);
@@ -30,6 +34,8 @@ export default function Home() {
     getTodos,
     { staleTime: 60 * 1000 },
   );
+
+  logger.info(`client env >> ${process.env.NEXT_PUBLIC_VAR_1}`);
 
   return (
     <>

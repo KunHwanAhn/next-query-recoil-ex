@@ -1,5 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
+
+import logger from '@/logger';
+
 import styles from './TodoItem.module.scss';
 
 interface TodoItemProps {
@@ -8,7 +11,7 @@ interface TodoItemProps {
 }
 export default function TodoItem({ id, text }: TodoItemProps) {
   const removeTodo = (targetId: number) => {
-    console.log(`remove ${targetId}`);
+    logger.info(`remove ${targetId}`);
   };
 
   return (

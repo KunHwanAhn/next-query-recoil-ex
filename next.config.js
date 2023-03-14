@@ -1,3 +1,7 @@
+const devBuildMode = process.env.BUILD_MODE === 'dev';
+
+console.log(`devBuildMode >> ${devBuildMode}`);
+
 /** @type {import('next').NextConfig} */
 const defaultConfig = {
   swcMinify: true,
